@@ -3,7 +3,7 @@
 #include <assimp/scene.h>
 #include <functional>
 #include <glm/glm.hpp>
-#include <animdata.h>
+//#include <animdata.h>
 #include <bone.h>
 #include <model_animation.h>
 #include <map>
@@ -16,11 +16,18 @@ struct AssimpNodeData {
     std::vector<AssimpNodeData> children;
 };
 
+//previously private var
+float m_Duration;
+int m_TicksPerSecond;
+std::vector<Bone> m_Bones;
+AssimpNodeData m_RootNode;
+std::map<std::string, BoneInfo> m_BoneInfoMap;
+
 class Animation {
 public:
     Animation() = default;
 
-    Animation(const std::string& animationPath, Model* model)
+    Animation(const std::string& animationPath, unsigned int ModelId)
     {
         Assimp::Importer importer;
         const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
@@ -31,7 +38,9 @@ public:
         aiMatrix4x4 globalTransformation = scene->mRootNode->mTransformation;
         globalTransformation = globalTransformation.Inverse();
         ReadHierarchyData(m_RootNode, scene->mRootNode);
-        ReadMissingBones(animation, *model);
+
+
+        ReadMissingBones(animation, ModelId);
     }
 
     ~Animation()
@@ -96,9 +105,5 @@ private:
             dest.children.push_back(newData);
         }
     }
-    float m_Duration;
-    int m_TicksPerSecond;
-    std::vector<Bone> m_Bones;
-    AssimpNodeData m_RootNode;
-    std::map<std::string, BoneInfo> m_BoneInfoMap;
+    
 };

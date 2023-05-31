@@ -8,6 +8,12 @@
 #include <map>
 #include <vector>
 
+//previous private
+std::vector<glm::mat4> m_FinalBoneMatrices;
+Animation* m_CurrentAnimation;
+float m_CurrentTime;
+float m_DeltaTime;
+
 class Animator {
 public:
     Animator(Animation* animation)
@@ -68,8 +74,5 @@ public:
     }
 
 private:
-    std::vector<glm::mat4> m_FinalBoneMatrices;
-    Animation* m_CurrentAnimation;
-    float m_CurrentTime;
-    float m_DeltaTime;
+    
 };

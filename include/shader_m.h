@@ -14,9 +14,11 @@ void checkCompileErrors(GLuint shader, std::string type);
 
 // constructor generates the shader on the fly
 // ------------------------------------------------------------------------
-unsigned int createShader(const char* vertexPath, const char* fragmentPath)
+unsigned int createShader(std::string vertexPathStr, std::string fragmentPathStr)
 {
     unsigned int shaderID;
+    const char* vertexPath = vertexPathStr.c_str();
+    const char* fragmentPath = fragmentPathStr.c_str();
 
     // 1. retrieve the vertex/fragment source code from filePath
     std::string vertexCode;

@@ -20,6 +20,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 void processDirectory(const std::filesystem::path& directory);
+string filepath(string path);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -77,31 +78,17 @@ int main()
     glEnable(GL_DEPTH_TEST);
 
 
-
-
-
     // build and compile shaders
     // -------------------------
+    unsigned int animShader = createShader(filepath("\\resources\\shaders\\anim_model.vs"), filepath("\\resources\\shaders\\anim_model.fs"));
+    unsigned int modelShader = createShader(filepath("\\resources\\shaders\\4.2.texture.vs"), filepath("\\resources\\shaders\\anim_model.fs"));
 
-    unsigned int animShader = createShader("C:/Users/tjalb/source/repos/game/resources/shaders/anim_model.vs", "C:/Users/tjalb/source/repos/game/resources/shaders/anim_model.fs");
-    unsigned int modelShader = createShader("C:/Users/tjalb/source/repos/game/resources/shaders/4.2.texture.vs", "C:/Users/tjalb/source/repos/game/resources/shaders/anim_model.fs");
-
-
-    std::string modelDirectory = "C:/Users/tjalb/source/repos/game/resources/models/";
-
-    processDirectory(modelDirectory);
-
-    for (int i = 0; i < 20; i++) {
-        std::cout << modelPaths[i] << "\n";
-    }
- 
-    Model containerModel("C:/Users/tjalb/source/repos/game/resources/models/container/container.dae");
-    
     // load models
     // -----------
-    Model ourModel("C:/Users/tjalb/source/repos/game/resources/models/vampire/dancing_vampire.dae");
+    Model containerModel(filepath("\\resources\\models\\container\\container.dae"));
+    Model ourModel(filepath("\\resources\\models\\vampire\\dancing_vampire.dae"));
 
-    Animation danceAnimation("C:/Users/tjalb/source/repos/game/resources/models/vampire/dancing_vampire.dae", &ourModel);
+    Animation danceAnimation(filepath("\\resources\\models\\vampire\\dancing_vampire.dae"), &ourModel);
 
     Animator animator(&danceAnimation);
 
@@ -241,4 +228,9 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll(yoffset);
+}
+
+string filepath(string path) {
+    std::filesystem::path currentDir = std::filesystem::current_path();
+    return currentDir.string().append(path);
 }

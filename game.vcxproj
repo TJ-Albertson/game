@@ -71,8 +71,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\tjalb\source\repos\game\include\;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\tjalb\source\repos\game\lib\x64\assimp;C:\Users\tjalb\source\repos\game\lib\x64\GLFW;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)lib\x64\assimp;$(SolutionDir)lib\x64\GLFW;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>C:\Users\tjalb\source\repos\game\include\;$(IncludePath)</IncludePath>
@@ -117,7 +117,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\tjalb\source\repos\game\lib\x64\assimp;C:\Users\tjalb\source\repos\game\lib\x64\GLFW;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib\x64\assimp;$(SolutionDir)lib\x64\GLFW;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);glfw3.lib;assimp.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
