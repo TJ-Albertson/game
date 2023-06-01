@@ -85,11 +85,10 @@ int main()
 
     // load models
     // -----------
-    Model containerModel(filepath("\\resources\\models\\container\\container.dae"));
-    Model ourModel(filepath("\\resources\\models\\vampire\\dancing_vampire.dae"));
+    unsigned int containerModel = LoadModel(filepath("\\resources\\models\\container\\container.dae"));
+    unsigned int ourModel = LoadModel(filepath("\\resources\\models\\vampire\\dancing_vampire.dae"));
 
     Animation danceAnimation(filepath("\\resources\\models\\vampire\\dancing_vampire.dae"), &ourModel);
-
     Animator animator(&danceAnimation);
 
     // draw in wireframe

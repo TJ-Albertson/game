@@ -30,6 +30,7 @@ vector<Mesh> meshes;
 string directory;
 bool gammaCorrection = false;
 unsigned int modelCount = 0;
+unsigned int currentModelId;
 
 struct BoneInfo {
 	/*id is index in finalBoneMatrices*/
@@ -89,6 +90,8 @@ unsigned int LoadModel(string const& path)
 
 	// process ASSIMP's root node recursively
 	processNode(scene->mRootNode, scene);
+	
+	currentModelId = modelCount;
 
 	return modelCount++;
 }
@@ -175,10 +178,10 @@ void SetVertexBoneData(Vertex& vertex, int boneID, float weight)
 	}
 }
 
-void ExtractBoneWeightForVertices(unsigned int ModelId, std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene)
+void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene)
 {
-	auto& boneInfoMap = ModelMap[ModelId].m_BoneInfoMap;
-	int& boneCount = ModelMap[ModelId].m_BoneCounter;
+    auto& boneInfoMap = ModelMap[currentModelId].m_BoneInfoMap;
+	int& boneCount = ModelMap[currentModelId].m_BoneCounter;
 
 	for (int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
 		int boneID = -1;
