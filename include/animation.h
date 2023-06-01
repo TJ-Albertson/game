@@ -24,6 +24,13 @@ AssimpNodeData m_RootNode;
 std::map<std::string, BoneInfo> m_BoneInfoMap;
 
 
+typedef struct {
+    float m_Duration;
+    int m_TicksPerSecond;
+    AssimpNodeData m_RootNode;
+    std::map<std::string, BoneInfo> m_BoneInfoMap;
+} Animation;
+
 
 
 void Animation(const std::string& animationPath, unsigned int ModelId)

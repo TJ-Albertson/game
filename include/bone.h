@@ -32,11 +32,13 @@ int m_NumPositions;
 int m_NumRotations;
 int m_NumScalings;
 
-glm::mat4 m_LocalTransform;
-std::string m_Name;
-int m_ID;
+typedef struct {
+    glm::mat4 m_LocalTransform;
+    std::string m_Name;
+    int m_ID;
+} Bone;
 
-void Bone(const std::string& name, int ID, const aiNodeAnim* channel)
+void LoadBone(const std::string& name, int ID, const aiNodeAnim* channel)
 {
     m_Name = name;
     m_ID = ID;
@@ -82,9 +84,9 @@ void Update(float animationTime)
     m_LocalTransform = translation * rotation * scale;
 }
 
-glm::mat4 GetLocalTransform() { return m_LocalTransform; }
-std::string GetBoneName() { return m_Name; }
-int GetBoneID() { return m_ID; }
+//glm::mat4 GetLocalTransform() { return m_LocalTransform; }
+//std::string GetBoneName() { return m_Name; }
+//int GetBoneID() { return m_ID; }
 
 int GetPositionIndex(float animationTime)
 {
