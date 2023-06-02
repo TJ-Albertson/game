@@ -17,11 +17,11 @@ struct AssimpNodeData {
 };
 
 // previously private var
-float m_Duration;
-int m_TicksPerSecond;
+//float m_Duration;
+//int m_TicksPerSecond;
 std::vector<Bone> m_Bones;
-AssimpNodeData m_RootNode;
-std::map<std::string, BoneInfo> m_BoneInfoMap;
+//AssimpNodeData m_RootNode;
+//std::map<std::string, BoneInfo> m_BoneInfoMap;
 
 
 typedef struct {
@@ -32,27 +32,38 @@ typedef struct {
 } Animation;
 
 
+std::vector<Animation> Animations;
 
-void Animation(const std::string& animationPath, unsigned int ModelId)
+
+Animation* CreateAnimation(const std::string& animationPath, unsigned int ModelId)
 {
+    Animation anim;
+
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
     assert(scene && scene->mRootNode);
     auto animation = scene->mAnimations[0];
-    m_Duration = animation->mDuration;
-    m_TicksPerSecond = animation->mTicksPerSecond;
+
+
+    anim.m_Duration = animation->mDuration;
+    anim.m_TicksPerSecond = animation->mTicksPerSecond;
+    
     aiMatrix4x4 globalTransformation = scene->mRootNode->mTransformation;
     globalTransformation = globalTransformation.Inverse();
-    ReadHierarchyData(m_RootNode, scene->mRootNode);
+    ReadHierarchyData(anim.m_RootNode, scene->mRootNode);
 
-    ReadMissingBones(animation, ModelId);
+    ReadMissingBones(&anim, animation, ModelId);
+
+    return &anim;
 }
+
+
 
 Bone* FindBone(const std::string& name)
 {
     auto iter = std::find_if(m_Bones.begin(), m_Bones.end(),
         [&](const Bone& Bone) {
-            return Bone.GetBoneName() == name;
+            return Bone.m_Name == name;
         });
     if (iter == m_Bones.end())
         return nullptr;
@@ -60,15 +71,7 @@ Bone* FindBone(const std::string& name)
         return &(*iter);
 }
 
-inline float GetTicksPerSecond() { return m_TicksPerSecond; }
-inline float GetDuration() { return m_Duration; }
-inline const AssimpNodeData& GetRootNode() { return m_RootNode; }
-inline const std::map<std::string, BoneInfo>& GetBoneIDMap()
-{
-    return m_BoneInfoMap;
-}
-
-void ReadMissingBones(const aiAnimation* animation, unsigned int ModelId)
+void ReadMissingBones(Animation* anim, const aiAnimation* animation, unsigned int ModelId)
 {
     int size = animation->mNumChannels;
 
@@ -84,11 +87,13 @@ void ReadMissingBones(const aiAnimation* animation, unsigned int ModelId)
             boneInfoMap[boneName].id = boneCount;
             boneCount++;
         }
-        m_Bones.push_back(Bone(channel->mNodeName.data,
-            boneInfoMap[channel->mNodeName.data].id, channel));
+
+        Bone bone = CreateBone(channel->mNodeName.data, boneInfoMap[channel->mNodeName.data].id, channel);
+
+        m_Bones.push_back(bone);
     }
 
-    m_BoneInfoMap = boneInfoMap;
+    anim->m_BoneInfoMap = boneInfoMap;
 }
 
 void ReadHierarchyData(AssimpNodeData& dest, const aiNode* src)

@@ -26,7 +26,7 @@ using namespace std;
 
 // model data
 vector<Texture> textures_loaded; // stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-vector<Mesh> meshes;
+vector<Mesh*> meshes;
 string directory;
 bool gammaCorrection = false;
 unsigned int modelCount = 0;
@@ -64,7 +64,7 @@ Model(string const& path, bool gamma = false)
 void DrawModel(unsigned int shaderID)
 {
 	for (unsigned int i = 0; i < meshes.size(); i++)
-		meshes[i].Draw(shaderID);
+		DrawMesh(meshes[i], shaderID);
 }
 
 //auto& GetBoneInfoMap() { return m_BoneInfoMap; }
@@ -90,7 +90,7 @@ unsigned int LoadModel(string const& path)
 
 	// process ASSIMP's root node recursively
 	processNode(scene->mRootNode, scene);
-	
+
 	currentModelId = modelCount;
 
 	return modelCount++;
@@ -120,7 +120,8 @@ void SetVertexBoneDataToDefault(Vertex& vertex)
 	}
 }
 
-Mesh processMesh(aiMesh* mesh, const aiScene* scene)
+// get assimp mesh data then load mesh data onto gpu
+Mesh* processMesh(aiMesh* mesh, const aiScene* scene)
 {
 	vector<Vertex> vertices;
 	vector<unsigned int> indices;
@@ -164,7 +165,9 @@ Mesh processMesh(aiMesh* mesh, const aiScene* scene)
 
 	ExtractBoneWeightForVertices(vertices, mesh, scene);
 
-	return Mesh(vertices, indices, textures);
+	Mesh* meshPointer = LoadMeshVertexData(vertices, indices, textures);
+
+	return meshPointer;
 }
 
 void SetVertexBoneData(Vertex& vertex, int boneID, float weight)
@@ -180,7 +183,7 @@ void SetVertexBoneData(Vertex& vertex, int boneID, float weight)
 
 void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene)
 {
-    auto& boneInfoMap = ModelMap[currentModelId].m_BoneInfoMap;
+	auto& boneInfoMap = ModelMap[currentModelId].m_BoneInfoMap;
 	int& boneCount = ModelMap[currentModelId].m_BoneCounter;
 
 	for (int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {

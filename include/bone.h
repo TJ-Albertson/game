@@ -38,11 +38,13 @@ typedef struct {
     int m_ID;
 } Bone;
 
-void LoadBone(const std::string& name, int ID, const aiNodeAnim* channel)
+Bone CreateBone(const std::string& name, int ID, const aiNodeAnim* channel)
 {
-    m_Name = name;
-    m_ID = ID;
-    m_LocalTransform = glm::mat4(1.0f);
+    Bone bone;
+
+    bone.m_Name = name;
+    bone.m_ID = ID;
+    bone.m_LocalTransform = glm::mat4(1.0f);
 
     m_NumPositions = channel->mNumPositionKeys;
 
@@ -74,14 +76,16 @@ void LoadBone(const std::string& name, int ID, const aiNodeAnim* channel)
         data.timeStamp = timeStamp;
         m_Scales.push_back(data);
     }
+
+    return bone;
 }
 
-void Update(float animationTime)
+void UpdateBone(Bone* bone, float animationTime)
 {
     glm::mat4 translation = InterpolatePosition(animationTime);
     glm::mat4 rotation = InterpolateRotation(animationTime);
     glm::mat4 scale = InterpolateScaling(animationTime);
-    m_LocalTransform = translation * rotation * scale;
+    bone->m_LocalTransform = translation * rotation * scale;
 }
 
 //glm::mat4 GetLocalTransform() { return m_LocalTransform; }

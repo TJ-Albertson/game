@@ -88,8 +88,8 @@ int main()
     unsigned int containerModel = LoadModel(filepath("\\resources\\models\\container\\container.dae"));
     unsigned int ourModel = LoadModel(filepath("\\resources\\models\\vampire\\dancing_vampire.dae"));
 
-    Animation danceAnimation(filepath("\\resources\\models\\vampire\\dancing_vampire.dae"), &ourModel);
-    Animator animator(&danceAnimation);
+    Animation* danceAnimation = CreateAnimation(filepath("\\resources\\models\\vampire\\dancing_vampire.dae"), ourModel);
+    Animator* animator = CreateAnimator(danceAnimation);
 
     // draw in wireframe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -106,7 +106,7 @@ int main()
         // input
         // -----
         processInput(window);
-        animator.UpdateAnimation(deltaTime);
+        UpdateAnimation(animator, deltaTime);
 
         // render
         // ------
@@ -127,7 +127,7 @@ int main()
         //(glGetUniformLocation(animShader, "view"), 1, GL_FALSE, &view[0][0]);
 
 
-        auto transforms = animator.GetFinalBoneMatrices();
+        auto transforms = animator->m_FinalBoneMatrices;
         for (int i = 0; i < transforms.size(); ++i)
             setShaderMat4(animShader, "finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
 
