@@ -26,11 +26,10 @@ using namespace std;
 
 // model data
 vector<Texture> textures_loaded; // stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-vector<Mesh*> meshes;
+
 string directory;
 bool gammaCorrection = false;
-unsigned int modelCount = 0;
-unsigned int currentModelId;
+
 
 struct BoneInfo {
 	/*id is index in finalBoneMatrices*/
@@ -42,10 +41,13 @@ struct BoneInfo {
 
 typedef struct {
 	std::map<std::string, BoneInfo> m_BoneInfoMap;
+    vector<Mesh*> meshes;
 	int m_BoneCounter;
-} BoneData;
+} Model;
 
-std::map<int, BoneData> ModelMap;
+Model currentModel;
+
+vector<Model*> models;
 
 /*
 std::map<string, BoneInfo> m_BoneInfoMap;
@@ -60,22 +62,31 @@ Model(string const& path, bool gamma = false)
 }
 */
 
+void DrawModel(Model* model, unsigned int shaderID);
+Model* LoadModel(string const& path);
+void processNode(aiNode* node, const aiScene* scene);
+void SetVertexBoneDataToDefault(Vertex& vertex);
+Mesh* processMesh(aiMesh* mesh, const aiScene* scene);
+void SetVertexBoneData(Vertex& vertex, int boneID, float weight);
+void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene);
+unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false);
+vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);
+
 // draws the model, and thus all its meshes
-void DrawModel(unsigned int shaderID)
+void DrawModel(Model* model, unsigned int shaderID)
 {
-	for (unsigned int i = 0; i < meshes.size(); i++)
-		DrawMesh(meshes[i], shaderID);
+        for (unsigned int i = 0; i < model->meshes.size(); i++)
+            DrawMesh(model->meshes[i], shaderID);
 }
 
 //auto& GetBoneInfoMap() { return m_BoneInfoMap; }
 //int& GetBoneCount() { return m_BoneCounter; }
 
-auto& GetBoneInfoMap(unsigned int ModelID) { return ModelMap[ModelID].m_BoneInfoMap; }
-int& GetBoneCount(unsigned int ModelID) { return ModelMap[ModelID].m_BoneCounter; }
-
 // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
-unsigned int LoadModel(string const& path)
+Model* LoadModel(string const& path)
 {
+    Model* model;
+    currentModel = *model;
 	// read file via ASSIMP
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
@@ -83,7 +94,7 @@ unsigned int LoadModel(string const& path)
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 	{
 		cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
-		return;
+		return model;
 	}
 	// retrieve the directory path of the filepath
 	directory = path.substr(0, path.find_last_of('\\'));
@@ -91,9 +102,7 @@ unsigned int LoadModel(string const& path)
 	// process ASSIMP's root node recursively
 	processNode(scene->mRootNode, scene);
 
-	currentModelId = modelCount;
-
-	return modelCount++;
+	return model;
 }
 
 // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
@@ -104,7 +113,7 @@ void processNode(aiNode* node, const aiScene* scene)
 		// the node object only contains indices to index the actual objects in the scene.
 		// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		meshes.push_back(processMesh(mesh, scene));
+        currentModel.meshes.push_back(processMesh(mesh, scene));
 	}
 	// after we've processed all of the meshes (if any) we then recursively process each of the children nodes
 	for (unsigned int i = 0; i < node->mNumChildren; i++) {
@@ -144,11 +153,13 @@ Mesh* processMesh(aiMesh* mesh, const aiScene* scene)
 
 		vertices.push_back(vertex);
 	}
+
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
 		aiFace face = mesh->mFaces[i];
 		for (unsigned int j = 0; j < face.mNumIndices; j++)
 			indices.push_back(face.mIndices[j]);
 	}
+
 	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
 	vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
@@ -183,8 +194,8 @@ void SetVertexBoneData(Vertex& vertex, int boneID, float weight)
 
 void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, const aiScene* scene)
 {
-	auto& boneInfoMap = ModelMap[currentModelId].m_BoneInfoMap;
-	int& boneCount = ModelMap[currentModelId].m_BoneCounter;
+	auto& boneInfoMap = currentModel.m_BoneInfoMap;
+    int& boneCount = currentModel.m_BoneCounter;
 
 	for (int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
 		int boneID = -1;
@@ -213,7 +224,7 @@ void ExtractBoneWeightForVertices(std::vector<Vertex>& vertices, aiMesh* mesh, c
 	}
 }
 
-unsigned int TextureFromFile(const char* path, const string& directory, bool gamma = false)
+unsigned int TextureFromFile(const char* path, const string& directory, bool gamma)
 {
 	string filename = string(path);
 	filename = directory + '/' + filename;

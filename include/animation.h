@@ -35,7 +35,11 @@ typedef struct {
 std::vector<Animation> Animations;
 
 
-Animation* CreateAnimation(const std::string& animationPath, unsigned int ModelId)
+void ReadMissingBones(Animation* anim, const aiAnimation* animation, Model* model);
+void ReadHierarchyData(AssimpNodeData& dest, const aiNode* src);
+
+
+Animation* CreateAnimation(const std::string& animationPath, Model* model)
 {
     Animation anim;
 
@@ -52,7 +56,7 @@ Animation* CreateAnimation(const std::string& animationPath, unsigned int ModelI
     globalTransformation = globalTransformation.Inverse();
     ReadHierarchyData(anim.m_RootNode, scene->mRootNode);
 
-    ReadMissingBones(&anim, animation, ModelId);
+    ReadMissingBones(&anim, animation, model);
 
     return &anim;
 }
@@ -71,12 +75,12 @@ Bone* FindBone(const std::string& name)
         return &(*iter);
 }
 
-void ReadMissingBones(Animation* anim, const aiAnimation* animation, unsigned int ModelId)
+void ReadMissingBones(Animation* anim, const aiAnimation* animation, Model* model)
 {
     int size = animation->mNumChannels;
 
-    auto& boneInfoMap = GetBoneInfoMap(ModelId); // getting m_BoneInfoMap from Model class
-    int& boneCount = GetBoneCount(ModelId); // getting the m_BoneCounter from Model class
+    auto& boneInfoMap = model->m_BoneInfoMap; // getting m_BoneInfoMap from Model class
+    int& boneCount = model->m_BoneCounter; // getting the m_BoneCounter from Model class
 
     // reading channels(bones engaged in an animation and their keyframes)
     for (int i = 0; i < size; i++) {
@@ -88,7 +92,7 @@ void ReadMissingBones(Animation* anim, const aiAnimation* animation, unsigned in
             boneCount++;
         }
 
-        Bone bone = CreateBone(channel->mNodeName.data, boneInfoMap[channel->mNodeName.data].id, channel);
+        Bone bone = *CreateBone(channel->mNodeName.data, boneInfoMap[channel->mNodeName.data].id, channel);
 
         m_Bones.push_back(bone);
     }

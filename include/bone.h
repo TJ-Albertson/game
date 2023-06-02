@@ -10,6 +10,25 @@
 #include <assimp_glm_helpers.h>
 #include <glm/gtx/quaternion.hpp>
 
+
+typedef struct {
+    glm::mat4 m_LocalTransform;
+    std::string m_Name;
+    int m_ID;
+} Bone;
+
+Bone* CreateBone(const std::string& name, int ID, const aiNodeAnim* channel); 
+void UpdateBone(Bone* bone, float animationTime);
+int GetPositionIndex(float animationTime);
+int GetRotationIndex(float animationTime);
+int GetScaleIndex(float animationTime);
+float GetScaleFactor(float lastTimeStamp, float nextTimeStamp, float animationTime);
+glm::mat4 InterpolatePosition(float animationTime);
+glm::mat4 InterpolateRotation(float animationTime);
+glm::mat4 InterpolateScaling(float animationTime);
+
+
+
 struct KeyPosition {
     glm::vec3 position;
     float timeStamp;
@@ -32,13 +51,9 @@ int m_NumPositions;
 int m_NumRotations;
 int m_NumScalings;
 
-typedef struct {
-    glm::mat4 m_LocalTransform;
-    std::string m_Name;
-    int m_ID;
-} Bone;
 
-Bone CreateBone(const std::string& name, int ID, const aiNodeAnim* channel)
+
+Bone* CreateBone(const std::string& name, int ID, const aiNodeAnim* channel)
 {
     Bone bone;
 
@@ -77,7 +92,7 @@ Bone CreateBone(const std::string& name, int ID, const aiNodeAnim* channel)
         m_Scales.push_back(data);
     }
 
-    return bone;
+    return &bone;
 }
 
 void UpdateBone(Bone* bone, float animationTime)
@@ -92,6 +107,8 @@ void UpdateBone(Bone* bone, float animationTime)
 //std::string GetBoneName() { return m_Name; }
 //int GetBoneID() { return m_ID; }
 
+
+// get position/rotation/scale based on time
 int GetPositionIndex(float animationTime)
 {
     for (int index = 0; index < m_NumPositions - 1; ++index) {

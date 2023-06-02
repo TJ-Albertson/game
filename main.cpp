@@ -85,8 +85,8 @@ int main()
 
     // load models
     // -----------
-    unsigned int containerModel = LoadModel(filepath("\\resources\\models\\container\\container.dae"));
-    unsigned int ourModel = LoadModel(filepath("\\resources\\models\\vampire\\dancing_vampire.dae"));
+    Model* containerModel = LoadModel(filepath("\\resources\\models\\container\\container.dae"));
+    Model* ourModel = LoadModel(filepath("\\resources\\models\\vampire\\dancing_vampire.dae"));
 
     Animation* danceAnimation = CreateAnimation(filepath("\\resources\\models\\vampire\\dancing_vampire.dae"), ourModel);
     Animator* animator = CreateAnimator(danceAnimation);
@@ -136,7 +136,7 @@ int main()
         model = glm::translate(model, glm::vec3(0.0f, -0.4f, 0.0f)); // translate it down so it's at the center of the scene
         model = glm::scale(model, glm::vec3(.5f, .5f, .5f)); // it's a bit too big for our scene, so scale it down
         setShaderMat4(animShader, "model", model);
-        ourModel.Draw(animShader);
+        DrawModel(ourModel, animShader);
 
         glUseProgram(modelShader);
         setShaderMat4(modelShader, "projection", projection);
@@ -148,7 +148,7 @@ int main()
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
         setShaderMat4(modelShader, "model", model);
-        containerModel.Draw(modelShader);
+        DrawModel(containerModel, modelShader);
         
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

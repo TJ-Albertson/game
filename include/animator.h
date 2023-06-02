@@ -19,7 +19,7 @@ typedef struct {
 } Animator;
 
 
-
+void CalculateBoneTransform(Animator* animator, const AssimpNodeData* node, glm::mat4 parentTransform);
 
 Animator* CreateAnimator(Animation* animation)
 {
@@ -31,6 +31,8 @@ Animator* CreateAnimator(Animation* animation)
 
     for (int i = 0; i < 100; i++)
         animator->m_FinalBoneMatrices.push_back(glm::mat4(1.0f));
+
+    return animator;
 }
 
 void UpdateAnimation(Animator* animator, float dt)
