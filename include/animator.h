@@ -18,7 +18,6 @@ typedef struct {
     Animation* m_CurrentAnimation;
 } Animator;
 
-
 void CalculateBoneTransform(Animator* animator, const AssimpNodeData* node, glm::mat4 parentTransform);
 
 Animator* CreateAnimator(Animation* animation)
@@ -35,15 +34,6 @@ Animator* CreateAnimator(Animation* animation)
     return animator;
 }
 
-void UpdateAnimation(Animator* animator, float dt)
-{
-    animator->m_DeltaTime = dt;
-    if (animator->m_CurrentAnimation) {
-        animator->m_CurrentTime += animator->m_CurrentAnimation->m_TicksPerSecond * dt;
-        animator->m_CurrentTime = fmod(animator->m_CurrentTime, animator->m_CurrentAnimation->m_Duration);
-        CalculateBoneTransform(animator, &animator->m_CurrentAnimation->m_RootNode, glm::mat4(1.0f));
-    }
-}
 
 void PlayAnimation(Animator* animator, Animation* pAnimation)
 {
@@ -51,6 +41,13 @@ void PlayAnimation(Animator* animator, Animation* pAnimation)
     animator->m_CurrentTime = 0.0f;
 }
 
+
+
+
+
+
+
+//recursively transfrom all noeds with bone
 void CalculateBoneTransform(Animator* animator, const AssimpNodeData* node, glm::mat4 parentTransform)
 {
     std::string nodeName = node->name;
@@ -66,12 +63,31 @@ void CalculateBoneTransform(Animator* animator, const AssimpNodeData* node, glm:
     glm::mat4 globalTransformation = parentTransform * nodeTransform;
 
     auto boneInfoMap = animator->m_CurrentAnimation->m_BoneInfoMap;
+
     if (boneInfoMap.find(nodeName) != boneInfoMap.end()) {
+
         int index = boneInfoMap[nodeName].id;
+
         glm::mat4 offset = boneInfoMap[nodeName].offset;
+
         animator->m_FinalBoneMatrices[index] = globalTransformation * offset;
     }
 
     for (int i = 0; i < node->childrenCount; i++)
         CalculateBoneTransform(animator, &node->children[i], globalTransformation);
+}
+
+
+void UpdateAnimation(Animator* animator, float dt)
+{
+    animator->m_DeltaTime = dt;
+
+    if (animator->m_CurrentAnimation) {
+
+        animator->m_CurrentTime += animator->m_CurrentAnimation->m_TicksPerSecond * dt;
+
+        animator->m_CurrentTime = fmod(animator->m_CurrentTime, animator->m_CurrentAnimation->m_Duration);
+
+        CalculateBoneTransform(animator, &animator->m_CurrentAnimation->m_RootNode, glm::mat4(1.0f));
+    }
 }

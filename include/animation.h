@@ -28,7 +28,6 @@ typedef struct {
     float m_Duration;
     int m_TicksPerSecond;
     AssimpNodeData m_RootNode;
-    std::map<std::string, BoneInfo> m_BoneInfoMap;
 } Animation;
 
 
@@ -46,6 +45,8 @@ Animation* CreateAnimation(const std::string& animationPath, Model* model)
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
     assert(scene && scene->mRootNode);
+
+
     auto animation = scene->mAnimations[0];
 
 
@@ -53,15 +54,15 @@ Animation* CreateAnimation(const std::string& animationPath, Model* model)
     anim.m_TicksPerSecond = animation->mTicksPerSecond;
     
     aiMatrix4x4 globalTransformation = scene->mRootNode->mTransformation;
+
     globalTransformation = globalTransformation.Inverse();
+
     ReadHierarchyData(anim.m_RootNode, scene->mRootNode);
 
     ReadMissingBones(&anim, animation, model);
 
     return &anim;
 }
-
-
 
 Bone* FindBone(const std::string& name)
 {
@@ -75,42 +76,24 @@ Bone* FindBone(const std::string& name)
         return &(*iter);
 }
 
-void ReadMissingBones(Animation* anim, const aiAnimation* animation, Model* model)
+
+void ReadHierarchyData(AssimpNodeData& dest, const aiNode* node)
 {
-    int size = animation->mNumChannels;
+    assert(node);
 
-    auto& boneInfoMap = model->m_BoneInfoMap; // getting m_BoneInfoMap from Model class
-    int& boneCount = model->m_BoneCounter; // getting the m_BoneCounter from Model class
+    dest.name = node->mName.data;
 
-    // reading channels(bones engaged in an animation and their keyframes)
-    for (int i = 0; i < size; i++) {
-        auto channel = animation->mChannels[i];
-        std::string boneName = channel->mNodeName.data;
+    dest.transformation = AssimpGLMHelpers::ConvertMatrixToGLMFormat(node->mTransformation);
 
-        if (boneInfoMap.find(boneName) == boneInfoMap.end()) {
-            boneInfoMap[boneName].id = boneCount;
-            boneCount++;
-        }
+    dest.childrenCount = node->mNumChildren;
 
-        Bone bone = *CreateBone(channel->mNodeName.data, boneInfoMap[channel->mNodeName.data].id, channel);
+    for (int i = 0; i < node->mNumChildren; i++) {
 
-        m_Bones.push_back(bone);
-    }
-
-    anim->m_BoneInfoMap = boneInfoMap;
-}
-
-void ReadHierarchyData(AssimpNodeData& dest, const aiNode* src)
-{
-    assert(src);
-
-    dest.name = src->mName.data;
-    dest.transformation = AssimpGLMHelpers::ConvertMatrixToGLMFormat(src->mTransformation);
-    dest.childrenCount = src->mNumChildren;
-
-    for (int i = 0; i < src->mNumChildren; i++) {
         AssimpNodeData newData;
-        ReadHierarchyData(newData, src->mChildren[i]);
+
+        ReadHierarchyData(newData, node->mChildren[i]);
+
         dest.children.push_back(newData);
+
     }
 }

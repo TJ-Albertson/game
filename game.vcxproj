@@ -143,6 +143,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Header.h" />
     <ClInclude Include="include\animation.h" />
     <ClInclude Include="include\animator.h" />
     <ClInclude Include="include\animdata.h" />
@@ -153,6 +154,7 @@
     <ClInclude Include="include\model_animation.h" />
     <ClInclude Include="include\shader_m.h" />
     <ClInclude Include="include\stb_image.h" />
+    <ClInclude Include="model.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="resources\shaders\4.2.texture.fs" />

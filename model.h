@@ -26,14 +26,12 @@ using namespace std;
 
 // model data
 vector<Texture> textures_loaded; // stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-
 string directory;
 bool gammaCorrection = false;
 
 struct BoneInfo {
     /*id is index in finalBoneMatrices*/
     int id;
-
     /*offset matrix transforms vertex from model space to bone space*/
     glm::mat4 offset;
 };
@@ -44,22 +42,16 @@ typedef struct {
     int m_BoneCounter;
 } Model;
 
-Model currentModel;
+struct assimpNode {
+    std::string name;
+    glm::mat4 transformation;
+    int childrenCount;
+    std::vector<assimpNode> children;
+};
 
+Model currentModel;
 vector<Model*> models;
 
-/*
-std::map<string, BoneInfo> m_BoneInfoMap;
-int m_BoneCounter = 0;
-/*
-// constructor, expects a filepath to a 3D model.
-/*
-Model(string const& path, bool gamma = false)
-        : gammaCorrection(gamma)
-{
-        loadModel(path);
-}
-*/
 
 void DrawModel(Model* model, unsigned int shaderID);
 Model* LoadModel(string const& path);
@@ -76,9 +68,6 @@ void DrawModel(Model* model, unsigned int shaderID)
     for (unsigned int i = 0; i < model->meshes.size(); i++)
         DrawMesh(model->meshes[i], shaderID);
 }
-
-// auto& GetBoneInfoMap() { return m_BoneInfoMap; }
-// int& GetBoneCount() { return m_BoneCounter; }
 
 // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 Model* LoadModel(string const& path)
@@ -97,6 +86,8 @@ Model* LoadModel(string const& path)
     // retrieve the directory path of the filepath
     directory = path.substr(0, path.find_last_of('\\'));
 
+    // if animation
+
     // process ASSIMP's root node recursively
     processNode(scene->mRootNode, scene);
 
@@ -106,6 +97,8 @@ Model* LoadModel(string const& path)
 // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
 void processNode(aiNode* node, const aiScene* scene)
 {
+    
+
     // process each mesh located at the current node
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
         // the node object only contains indices to index the actual objects in the scene.
@@ -169,17 +162,6 @@ Mesh* processMesh(aiMesh* mesh, const aiScene* scene)
     return meshPointer;
 }
 
-void SetVertexBoneData(VertexData& vertexData, int boneID, float weight)
-{
-    for (int i = 0; i < MAX_BONE_INFLUENCE; ++i) {
-        if (vertexData.m_BoneIDs[i] < 0) {
-            vertexData.m_Weights[i] = weight;
-            vertexData.m_BoneIDs[i] = boneID;
-            break;
-        }
-    }
-}
-
 void ExtractBoneWeightForVertices(std::vector<VertexData>& vertexData, aiMesh* mesh, const aiScene* scene)
 {
     auto& boneInfoMap = currentModel.m_BoneInfoMap;
@@ -215,8 +197,7 @@ void ExtractBoneWeightForVertices(std::vector<VertexData>& vertexData, aiMesh* m
 
             assert(vertexId <= vertexData.size());
 
-            for (int i = 0; i < MAX_BONE_INFLUENCE; ++i)
-            {
+            for (int i = 0; i < MAX_BONE_INFLUENCE; ++i) {
                 if (vertexData[vertexId].m_BoneIDs[i] < 0) {
                     vertexData[vertexId].m_Weights[i] = weight;
                     vertexData[vertexId].m_BoneIDs[i] = boneID;
