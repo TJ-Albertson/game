@@ -97,6 +97,8 @@ Model* LoadModel(string const& path)
     // retrieve the directory path of the filepath
     directory = path.substr(0, path.find_last_of('\\'));
 
+    //process meshes
+
     // process ASSIMP's root node recursively
     processNode(scene->mRootNode, scene);
 

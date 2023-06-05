@@ -14,6 +14,16 @@ typedef struct {
     int mNumMeshes;
 } aiNode;
 
+typedef struct {
+    localtransform;
+    offset;
+    id;
+} Bone;
+
+typedef struct {
+    weight;
+    id;
+} vertexBone;
 
 typedef struct {
     int mNumMeshes;
@@ -37,6 +47,18 @@ void recurseIterate(aiNode node, string name, string MeshNodeName, string MeshNo
     
 }
 
+void createBoneMap(aiScene scene) {
+    foreach mesh in scene
+        foreach bone in mesh
+            skeeletonNods.push_back(bone.name)
+                vertexBone.pushback(bone.name, id)
+}
+
+
+// find cloeset bone node
+
+
+
 void CopyNodesWithMeshes(aiNode node, MeshNode rootNode, Matrix4x4 accTransform)
 {
     SceneObject parent;
@@ -52,13 +74,7 @@ void CopyNodesWithMeshes(aiNode node, MeshNode rootNode, Matrix4x4 accTransform)
         // copy the meshes
         CopyMeshes(node, meshNode);
 
-        foreach(meshId in meshNode) {
-            currentMesh = scen.meshes[meshID];
-            bones = currentMesh.Bones;
-
-            recurseIterate(node, bone.name, meshNode.name, meshNode.parent.name)
-        }
-
+  
         // the new object is the parent for all child nodes
         parent = meshNode;
         transform.SetUnity();
@@ -76,5 +92,9 @@ void CreateSkeleton(aiNode node) {
 
     foreach skeleonNodes 
         if skeletonNode.name == node.anme && skeletonNode.bool = 1
-            
+           
 }
+
+
+
+
