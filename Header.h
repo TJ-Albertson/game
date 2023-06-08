@@ -15,15 +15,16 @@ typedef struct {
 } aiNode;
 
 typedef struct {
-    localtransform;
-    offset;
-    id;
+    std::string mName;
+    glm::mat4 mLocalTrasnfom;
+    glm::mat4 mOffsetMatrix;
+    unsigned int id;
 } Bone;
 
 typedef struct {
-    weight;
-    id;
-} vertexBone;
+    float weight;
+    unsigned int id;
+} vertexBoneData;
 
 typedef struct {
     int mNumMeshes;

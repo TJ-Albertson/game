@@ -10,6 +10,8 @@
 
 // previous private
 
+// this should dole the current time and animate all 
+
 
 typedef struct {
     std::vector<glm::mat4> m_FinalBoneMatrices;
@@ -42,12 +44,27 @@ void PlayAnimation(Animator* animator, Animation* pAnimation)
 }
 
 
+//update all currently playing animations
+
+animate(const AssimpNodeData* boneNode, glm::mat4 parentTransform) {
+
+    UpdateBone(Bone, animator->m_CurrentTime);
+
+    glm::mat4 transfrom = Bone.localtransform * parentTransform;
+
+    m_FinalBoneMatricessform[Bone.id] = transfrom * Bone.offset;
+
+ 
+    for(int i = 0; i < Bone.nu)
+        animate(bone.child, transfrom)
+}
+
+
+//multiple skeletons
 
 
 
 
-
-//recursively transfrom all noeds with bone
 void CalculateBoneTransform(Animator* animator, const AssimpNodeData* node, glm::mat4 parentTransform)
 {
     std::string nodeName = node->name;
