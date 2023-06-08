@@ -54,7 +54,6 @@ animate(const AssimpNodeData* boneNode, glm::mat4 parentTransform) {
 
     m_FinalBoneMatricessform[Bone.id] = transfrom * Bone.offset;
 
- 
     for(int i = 0; i < Bone.nu)
         animate(bone.child, transfrom)
 }
