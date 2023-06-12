@@ -72,11 +72,17 @@ Bone* CreateBone(const std::string& name, int ID, const aiNodeAnim* channel)
     m_NumPositions = channel->mNumPositionKeys;
 
     for (int positionIndex = 0; positionIndex < m_NumPositions; ++positionIndex) {
+
         aiVector3D aiPosition = channel->mPositionKeys[positionIndex].mValue;
+
         float timeStamp = channel->mPositionKeys[positionIndex].mTime;
+
         KeyPosition data;
+
         data.position = AssimpGLMHelpers::GetGLMVec(aiPosition);
+
         data.timeStamp = timeStamp;
+
         m_Positions.push_back(data);
     }
 
@@ -114,6 +120,21 @@ void UpdateBone(Bone* boneNode, float animationTime)
     boneNode->m_LocalTransform = translation * rotation * scale;
 }
 
+
+
+struct IndexIn {
+    int m_Num;
+
+};
+
+int GetPositionIndex(animationNode* animationNode, float animationTime)
+{
+    for (int index = 0; index < animationNode->m_NumPositions - 1; ++index) {
+        if (animationTime < animationNode->m_Positions[index + 1].timeStamp)
+            return index;
+    }
+    assert(0);
+}
 
 // get position/rotation/scale based on time
 int GetPositionIndex(animationNode* animationNode, float animationTime)
